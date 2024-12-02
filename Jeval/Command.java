@@ -19,7 +19,8 @@ public class Command {
         RETURN_NUMBER,
         SIN, COS, TAN,
         LOG, LN, SQRT,
-        TIME
+        TIME,
+        TO_INT, ABS,
     }
 
     public static class Sin extends Command {
@@ -157,6 +158,52 @@ public class Command {
 
         public double func(Double x) {
             return Math.sqrt(x);
+        }
+    }
+
+    public static class ToInt extends Command {
+        private int r1, ro;
+
+        ToInt(int r1, int ro) {
+            this.r1 = r1;
+            this.ro = ro;
+        }
+
+        @Override
+        public void run(VM vm) {
+            vm.registers[ro] = Math.floor(vm.registers[r1]);
+        }
+
+        @Override
+        public String toCode() {
+            return ".toInt r" + r1 + " -> r" + ro;
+        }
+
+        public double func(double x) {
+            return Math.floor(x);
+        }
+    }
+
+    public static class Abs extends Command {
+        private int r1, ro;
+
+        Abs(int r1, int ro) {
+            this.r1 = r1;
+            this.ro = ro;
+        }
+
+        @Override
+        public void run(VM vm) {
+            vm.registers[ro] = Math.abs(vm.registers[r1]);
+        }
+
+        @Override
+        public String toCode() {
+            return ".abs r" + r1 + " -> r" + ro;
+        }
+
+        public double func(double x) {
+            return Math.abs(x);
         }
     }
 

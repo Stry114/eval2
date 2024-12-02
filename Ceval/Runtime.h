@@ -71,6 +71,16 @@ public:
         }
         return result;
     }
+
+    double run(std::vector<Command *> commandList)
+    {
+        result = 0.;
+        for (int i = 0; i < commandList.size(); i++)
+        {
+            commandList[i]->run(this);
+        }
+        return result;
+    }
 };
 
 class Const : public Command
@@ -468,5 +478,51 @@ public:
     void run(VM *vm) override
     {
         vm->registers[ro] = sqrt(vm->registers[r1]);
+    }
+};
+
+class ToInt : public Command
+{
+private:
+    int r1, ro;
+
+public:
+    ToInt(int r1, int ro)
+    {
+        this->r1 = r1;
+        this->ro = ro;
+    }
+
+    std::string toCode() override
+    {
+        return ".toInt r" + std::to_string(r1) + " -> r" + std::to_string(ro);
+    }
+
+    void run(VM *vm) override
+    {
+        vm->registers[ro] = floor(vm->registers[r1]);
+    }
+};
+
+class Abs : public Command
+{
+private:
+    int r1, ro;
+
+public:
+    Abs(int r1, int ro)
+    {
+        this->r1 = r1;
+        this->ro = ro;
+    }
+
+    std::string toCode() override
+    {
+        return ".abs r" + std::to_string(r1) + " -> r" + std::to_string(ro);
+    }
+
+    void run(VM *vm) override
+    {
+        vm->registers[ro] = abs(vm->registers[r1]);
     }
 };

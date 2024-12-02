@@ -86,6 +86,40 @@ public class Demo {
 }
 >>>5.43656365691809
 ```
+## Ceval (基于C++)
+### 使用编译器
+```C++
+#include "Ceval2.h"
+#include <iostream>
+
+int main()
+{
+    VM vm = VM();
+    Compiler compiler = Compiler();
+
+    std::vector<Command *> codes = compiler.compiler("2e*sin(0.5pi)");
+    double ans = vm.run(codes);
+    printf("%f", ans);
+
+    return 0;
+}
+
+>>> 5.436564
+```
+你也可以直接使用`Ceval2.ceval2()`函数来自动完成上述过程（编译与运行）。
+```C++
+#include "Ceval2.h"
+#include <iostream>
+
+int main()
+{
+    double ans = ceval2("2e*sin(0.5pi)");
+    printf("%f", ans);
+    return 0;
+}
+
+>>> 5.436564
+```
 ## Peval (基于Python)
 ### 使用解释器
 ```Python
@@ -120,9 +154,6 @@ print(ans)
 
 >>>5.43656365691809
 ```
-## Ceval (基于C++)
-目前Ceval只完成了runtime与vm，基于C++的编译器与解释器仍处于调试与开发阶段。
-如有必要，可以尝试编写机器码，然后在vm上运行。
 # 表达式规范
 ## 使用解释器时 (ceval/jevel/peval)
 ### 解释器支持五种基本运算符号：
@@ -214,6 +245,9 @@ print(ans)
 |log|以10为底数的对数函数|
 |ln|以e为底数的对数函数|
 |sqrt|开平方根|
+|toInt|向下取整|
+|abs|取绝对值|
+|power|指数函数（当前未实装）|
 ### 虚拟机支持变量
 以下是所有初始变量。
 
@@ -328,6 +362,9 @@ int main()
 |log|Log|`.log r1 -> r0`|求寄存器r1中数值的log值，并赋值给寄存器r0|
 |ln|Ln|`.ln r1 -> r0`|求寄存器r1中数值的ln值，并赋值给寄存器r0|
 |sqrt|Sqrt|`.sqrt r1 -> r0`|求寄存器r1中数值的sqrt值，并赋值给寄存器r0|
+|toInt|ToInt|`.toInt r1 -> ro`|将寄存器r1中的数值向下取整，并赋值给寄存器r0|
+|abs|Abs|`.abs r1 -> ro`|求寄存器r1中的数值的绝对值，并赋值给寄存器ro|
+|power|未定义|未定义|未定义|
 ## 查看编译器编译产生的机器码
 可以使用`encode()`函数查看编译结果。
 ### Java
@@ -368,6 +405,26 @@ print(encode(codes))
 .sin r0 -> r0
 .time 5.0 -> r0
 .return r0
+```
+### C++
+```C++
+#include "Ceval2.h"
+#include <iostream>
+
+int main()
+{
+    Compiler compiler = Compiler();
+    std::vector<Command *> codes = compiler.compiler("5sin(0.5pi)");
+    std::cout << encode(codes) << std::endl;
+}
+```
+```
+.initVar pi -> r0
+.time 0.500000 -> r0
+.sin r0 -> r0
+.time 5.000000 -> r0
+.return r0
+
 ```
 # 用例：计算数列求和
 计算数列 $a_n=\sqrt{(n+1)(n+2)} $ 的前10000项和
@@ -412,16 +469,38 @@ public class Demo {
 
 >>>5.001999893564133E7
 ```
+ - C++
+```C++
+int main()
+{
+    VM vm = VM();
+    Compiler compiler = Compiler();
+
+    double sum_val = 0;
+    std::vector<Command *> codes = compiler.compiler("sqrt((x+1)(x+2))");
+
+    for (double i = 1; i < 10001; i++)
+    {
+        vm.varDic["x"] = i;
+        sum_val += vm.run(codes);
+    }
+
+    printf("%f", sum_val);
+    return 0;
+}
+
+>>> 50019998.935641
+```
 ### 性能对比
 |方案|用时(s)|输出结果|
 |---|---|---|
 |Python build-in `eval()`|0.0651490|50019998.93564133|
 |Peval Compiler & VM|0.0066150|50019998.93564133|
 |Jeval Compiler & VM|0.0148496|5.001999893564133E7|
-|Ceval VM|0.001924|5.002e+07|
+|Ceval Compiler & VM|0.0067910|50019998.935641|
  - 测试数据为平均数据。
  - 经测试，Jeval 在编译阶段耗费了大量时间，导致其测试表现远低于 Peval。这是由于其编译器性能不佳。
- - Ceval的编译器未完成，测试数据是手动编写机器码后，使用 Ceval VM 运行的结果。
+ - 经测试，Ceval 采用 `std::vector<Command*>` 用于存储机器码时，会出现性能受限的情况，最差情况下测试结果与Peval相近。这个问题可能会在后续更新中解决。
 # 关于文件及版本的说明
 ## Item
 名为`Item`的文件支持了使用解释器计算表达式的值。
@@ -435,6 +514,9 @@ public class Demo {
 ## Peval2/Jeval2/Ceval2
 以2结尾的文件包含了很多可以直接使用的函数
 ## 版本
- - 我将目前的版本号记为1。通过`VM.verCode`来查看版本号。
- - C++版本的编译器仍未完成，将在日后逐渐完善。
+ - 我将目前的版本号记为2。通过`VM.verCode`来查看版本号。
+ - C++版本的解释器仍未完成，后续可能不会制作。这是因为解释器在性能方面并不具有优势，而且制作它会不得不去改动很多屎山代码。
  - 关于解释器，它是个早期的作品，稍微改一下就会出现很多bug，现在我也不愿意维护它们了，我也不建议任何人去动它。
+### 版本号 2 的新内容
+现在支持基于C++的编译器了。
+

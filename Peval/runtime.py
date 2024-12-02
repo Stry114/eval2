@@ -69,6 +69,10 @@ class Command:
         SQRT = 14
         TIME = 15
 
+        # POWER = 16
+        TO_INT = 17
+        ABS = 18
+
 
 class Sin(Command):
     def __init__(self, r1:int, ro:int):
@@ -146,7 +150,30 @@ class Sqrt(Command):
 
     def toCode(self):
         return f".sqrt r{self.r1} -> r{self.ro}"
+    
+class ToInt(Command):
+    def __init__(self, r1:int, ro:int):
+        self.r1 = r1
+        self.ro = ro
+        self.func = math.floor
+    
+    def run(self, vm:VM):
+        vm.registers[self.ro] = math.floor(vm.registers[self.r1])
 
+    def toCode(self):
+        return f".toInt r{self.r1} -> r{self.ro}"
+    
+class Abs(Command):
+    def __init__(self, r1:int, r2:int):
+        self.r1 = r1
+        self.r2 = r2
+        self.func = abs
+
+    def run(self, vm:VM):
+        vm.registers[self.ro] = abs(vm.registers[self.r1])
+
+    def toCode(self):
+        return f".abs r{self.r1} -> {self.ro}"
 
 class InitRegister(Command):
     def __init__(self, number:int):
