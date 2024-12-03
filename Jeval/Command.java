@@ -21,6 +21,7 @@ public class Command {
         LOG, LN, SQRT,
         TIME,
         TO_INT, ABS,
+        OPPOSITE,
     }
 
     public static class Sin extends Command {
@@ -420,6 +421,24 @@ public class Command {
         @Override
         public void run(VM vm) {
             vm.registers[ro] = vm.varDic.get(varName);
+        }
+    }
+
+    public static class Opposite extends Command {
+        private int ro;
+
+        Opposite(int ro) {
+            this.ro = ro;
+        }
+
+        @Override
+        public String toCode() {
+            return ".opposite -> r" + ro;
+        }
+
+        @Override
+        public void run(VM vm) {
+            vm.registers[ro] = 0 - vm.registers[ro];
         }
     }
 }

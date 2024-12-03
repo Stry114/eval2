@@ -329,7 +329,8 @@ class Compiler:
                     if symbolType == 1:
                         self.o(Accumulate(last_item.value, ro))
                     else:
-                        self.o(Accumulate(0-last_item.value, ro))
+                        self.o(Opposite(ro))
+                        self.o(Accumulate(last_item.value, ro))
                     item = Compiler.Variable("temp")
                     item.register = ro
                 else:

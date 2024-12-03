@@ -72,6 +72,7 @@ class Command:
         # POWER = 16
         TO_INT = 17
         ABS = 18
+        OPPOSITE = 19
 
 
 class Sin(Command):
@@ -318,6 +319,18 @@ class InitVar(Command):
 
     def run(self, vm:VM):
         vm.registers[self.ro] = vm.VarDic[self.var]
+
+
+class Opposite(Command):
+    def __init__(self, ro: int):
+        self.type = Command.Type.OPPOSITE
+        self.ro = ro
+
+    def toCode(self):
+        return f".opposite -> r{self.ro}"
+    
+    def run(self, vm:VM):
+        vm.registers[self.ro] = 0 - vm.registers[self.ro]
 
 
 if __name__ == "__main__":

@@ -526,3 +526,25 @@ public:
         vm->registers[ro] = abs(vm->registers[r1]);
     }
 };
+
+class Opposite : public Command
+{
+private:
+    int r1, ro;
+
+public:
+    Opposite(int ro)
+    {
+        this->ro = ro;
+    }
+
+    std::string toCode() override
+    {
+        return ".opposite -> r" + std::to_string(ro);
+    }
+
+    void run(VM *vm) override
+    {
+        vm->registers[ro] = 0 - vm->registers[ro];
+    }
+};

@@ -535,7 +535,8 @@ private:
 					}
 					else
 					{
-						o(new Accumulate(0 - lastItem.value, ro));
+						o(new Opposite(ro));
+						o(new Accumulate(lastItem.value, ro));
 					}
 					itemfill = new Variable("temp");
 					itemfill->_register = ro;
